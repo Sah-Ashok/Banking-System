@@ -3,6 +3,7 @@ import * as accountService from "../service/account.service.js";
 
 
 export const createAccount  = async (req: Request , res: Response): Promise<void> => {
+	console.log("Creating account with data:", req.body);
 try{
 	const account = await accountService.createAccount(req.body);
 	res.status(201).json({success: true , data: account});
@@ -35,6 +36,7 @@ export const getAccount = async (req: Request , res: Response): Promise<void> =>
 };
 
 export const deposit = async (req: Request , res: Response): Promise<void> => {
+	console.log("Depositing with data:", req.body);
 	try{
 		const account = await accountService.deposite(req.body);
 		res.status(200).json({success: true , data: account});

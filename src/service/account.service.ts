@@ -24,25 +24,28 @@ export const getAccountById = async (id: string): Promise<Account | null > => {
  
 
 
-export const deposite = async (data: AccountAmountDTO) : Promise<Account | null> => {
- const account = await getAccountById(data.accountId);
+export const deposite = async (data: AccountAmountDTO): Promise<Account | null> => {
+  const account = await getAccountById(data.accountId);
+
   if (!account) throw new Error("Account not found");
- if (data.amount <= 0) throw new Error("Amount must be greater than zero");
+  if (data.amount <= 0) throw new Error("Amount must be greater than zero");
 
- const  result = await pool.query<Account>(
-  `UPDATE accounts SET balance = balance + $1 where id = $2 
-  RETURNING *`,
-  [data.amount , data.accountId]
- );
+  const result = await pool.query<Account>(
+    `UPDATE accounts 
+     SET balance = balance + $1 
+     WHERE id = $2 
+     RETURNING *`,
+    [data.amount, data.accountId]
+  );
 
- await pool.query(
-  `INSERT INTO transactions ( id , account_id , type amount , created_at ) 
-  values ($1 , $2 , $3 , $4 , NOW())`,
-  [uuidv4() , data.accountId , "deposit" , data.amount]
- )
- return result.rows[0] || null;
-}
+  await pool.query(
+    `INSERT INTO transactions (id, account_id, type, amount, created_at) 
+     VALUES ($1, $2, $3, $4, NOW())`,
+    [uuidv4(), data.accountId, "deposit", data.amount]
+  );
 
+  return result.rows[0] || null;
+};
 
 export const withdraw = async (data: AccountAmountDTO) : Promise<Account | null >  => {
   const account = await getAccountById(data.accountId);

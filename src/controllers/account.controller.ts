@@ -1,5 +1,5 @@
 import type {Request , Response} from "express";
-import * as accountService from "../service/account.service.js";
+import * as accountService from "../service/account.service";
 
 
 export const createAccount  = async (req: Request , res: Response): Promise<void> => {

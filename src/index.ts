@@ -21,3 +21,13 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
+
+process.on("uncaughtException", (err: Error) => {
+    console.error("Uncaught Exception:", err);
+    process.exit(1);
+});
+
+process.on("unhandledRejection" , (reason: unknown) => {
+    console.error("Unhandled Rejection:", reason);
+    process.exit(1);
+})

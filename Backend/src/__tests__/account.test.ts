@@ -95,7 +95,7 @@ it("should transfer money between accounts", async () => {
   expect(response.body.message).toBe("Transfer successful");
 });
 
-    it("should get transactions for an account", async () => {
+it("should get transactions for an account", async () => {
         const created = await request(app)
             .post("/api/accounts")
             .send({ owner: "Transaction Test", initialBalance: 1000 });
@@ -127,5 +127,30 @@ it("should transfer money between accounts", async () => {
         });
         expect(Number(response.body.data[1].amount)).toBe(500);
     });
+
+
+ it("should return 404 for non-existing account", async () => {
+  const response = await request(app)
+    .get("/api/accounts/non-existing-id");
+
+  expect(response.status).toBe(404);
+  expect(response.body.success).toBe(false);
+});
+
+it("should fail withdraw when insufficient balance", async () => {
+  const created = await request(app)
+    .post("/api/accounts")
+    .send({ owner: "Ashok", initialBalance: 100 });
+
+  const accountId = created.body.data.id;
+
+  const response = await request(app)
+    .post("/api/accounts/withdraw")
+    .send({ accountId, amount: 500 });
+
+  expect(response.status).toBe(400);
+  expect(response.body.success).toBe(false);
+  expect(response.body.message).toBe("Insufficient funds");
+});
 
 });

@@ -13,15 +13,40 @@ export const createAccount = async (data: CreateAccountDTO): Promise<Account | n
   return result.rows[0] || null;
 };
 
-
 export const getAccountById = async (id: string): Promise<Account | null > => {
-  const result = await pool.query<Account>(
+  try{
+      const result = await pool.query<Account>(
     `SELECT * FROM accounts WHERE id = $1`,
     [id]
   );
   return result.rows.length > 0 ? (result.rows[0] as Account) : null;
+
+  }catch(err){
+    console.log("getAccountById : " , err)
+   return null;
+  }
+
 };
  
+export const getAllAccounts = async (): Promise<Account[]> => {
+const result = await pool.query<Account>(
+  `select * FROM accounts ORDER BY  created_at DESC`
+);
+return result.rows;
+}
+
+export const deleteAccounts = async (): Promise<Account[]> => {
+  await pool.query(`
+    DELETE FROM transactions
+  `);
+  const result = await pool.query<Account>(`
+    DELETE FROM accounts
+    RETURNING *
+  `);
+
+  return result.rows;
+};
+
 
 
 export const deposite = async (data: AccountAmountDTO): Promise<Account | null> => {
@@ -82,7 +107,7 @@ export const transfer = async (data: TransferDTO): Promise<void> => {
 
   await pool.query(
     `UPDATE accounts SET balance = balance + $1 WHERE id = $2`,
-    [data.amount, data.toAccountId]  // ✅ toAccountId not toAccount
+    [data.amount, data.toAccountId]  
   );
 
   await pool.query(
@@ -91,10 +116,8 @@ export const transfer = async (data: TransferDTO): Promise<void> => {
     [uuidv4(), data.fromAccountId, "transfer", data.amount] // ✅ added params
   );
 };
-
 	
-	
-	export const getTransactions = async (accountId: string): Promise<Transaction[]> => {
+export const getTransactions = async (accountId: string): Promise<Transaction[]> => {
 		const result = await pool.query<Transaction>(
 		`SELECT * FROM transactions WHERE account_id = $1  ORDER BY created_at DESC`,
 		[accountId]
